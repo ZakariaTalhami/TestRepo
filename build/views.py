@@ -5,10 +5,10 @@ from .models import Build
 from .appconfig import Config
 from datetime import date
 from django.db.models import Max
-from django.db import connection
+from django.views import View
+from django.http import HttpResponse, HttpResponseForbidden
 from rest_framework.pagination import PageNumberPagination
 import requests
-
 
 """
 read data from jenkinz and store in db  ...............................................................
@@ -16,28 +16,21 @@ read data from jenkinz and store in db  ........................................
 
 
 def run_test_job_build(url):
-    req = requests.get(url, auth=(Config.jobs['run_test']['username'], Config.jobs['run_test']['password']))
+    req = requests.get(url, auth=(Config.jenkins_user['username'], Config.jenkins_user['password']))
     if req.status_code == 200:
         return req.json()
     return None
 
 
-def param_to_json(params):
-    str = "{"
-    for i, param in params:
-        str += "\'" + param.get('name') + "\':\'" + param.get('value') + "\'"
-        if i != len(params):
-            str += ", "
-    return str + "}"
-
-
 def analyze_action(actions, build_obj):
     count = 0
     for node in actions:
-        if node.get('_class') == 'hudson.model.StringParameterValue':
-            build_obj.param = param_to_json(node.get('parameters'))
+        if not node:
+            continue
+        if node['_class'] == 'hudson.model.ParametersAction' or node['_class'] == 'com.tikal.jenkins.plugins.multijob.MultiJobParametersAction':
+            build_obj.param = {x['name']: x['value'] for x in node.get('parameters')}
             count += 1
-        elif node.get('_class') == 'hudson.triggers.TimerTrigger$TimerTriggerCause':
+        elif node['_class'] == 'hudson.triggers.TimerTrigger$TimerTriggerCause' or node['_class'] == 'hudson.model.Cause$UpstreamCause':
             build_obj.cause = node.get('shortDescription')
             count += 1
         if count == 2:
@@ -46,8 +39,8 @@ def analyze_action(actions, build_obj):
 
 def read_build(b):
     build = Build()
-    build.num = b.get('id')
     analyze_action(b.get('actions'), build)
+    build.num = b.get('id')
     build.description = b.get('description')
     build.duration = b.get('duration')
     build.result = b.get('result') == 'SUCCESS'
@@ -58,25 +51,24 @@ def read_build(b):
     if b.get('subBuilds'):
         for sub in b.get('subBuilds'):
             data = run_test_job_build('http://35.157.133.88:8080/' + sub['url'] + '/api/json')
-            sub_build = read_build(data)
-            sub_build.is_sub = True
-            build.sub_builds.add(sub_build)
+            if data:
+                sub_build = read_build(data)
+                sub_build.is_sub = True
+                sub_build.save()
+                build.sub_builds.add(sub_build)
         build.save()
-
     return build
 
 
-def save(request):
+def save_builds():
     data = run_test_job_build(Config.jobs['run_test']['url'])
-    max = Build.objects.aggregate(Max('num'))['num__max']
+    if not data:
+        return
+    max = Build.objects.filter(is_sub__exact=False).aggregate(Max('num'))['num__max']
     max = max if max else 0
-    id_inserted = ""
-    if data:
-        for b in data['builds']:
-            if int(b['id']) > max:
-                id_inserted += b['id'] + " "
-                read_build(b)
-    return render(request, "dashbord.html", {'s': "Success, inserted id : " + id_inserted + " ,and max is " + str(max)})
+    for b in data['builds']:
+        if int(b['id']) > max:
+            read_build(b)
 
 
 """
@@ -90,8 +82,30 @@ class BuildsListPagination(PageNumberPagination):
 
 class BuildsListAPIView(generics.ListAPIView):
     serializer_class = BuildSerializer
-    queryset = Build.objects.filter(is_sub__exact=False)
     pagination_class = BuildsListPagination
 
+    def get_queryset(self):
+        save_builds()
+        return Build.objects.filter(is_sub__exact=False)
 
-print(connection.queries)
+
+class Dashboard(View):
+    @staticmethod
+    def get(request):
+        return render(request, "dashboard.html", {})
+
+
+class Trigger(View):
+    @staticmethod
+    def get(request):
+        return render(request, 'dashboard.html', {})
+
+    @staticmethod
+    def post(request):
+        url = Config.jobs['run_test']['trigger']['url']. \
+            format(min=request.POST['min'], max=request.POST['max'], threshold=request.POST['th'])
+        req = requests.post(url, auth=(Config.jenkins_user['username'], Config.jenkins_user['token']))
+        if req.status_code == 201:
+            return HttpResponse(status=201)
+        return HttpResponseForbidden()
+

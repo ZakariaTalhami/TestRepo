@@ -1,4 +1,5 @@
 from django.db import models
+from django_mysql.models import JSONField
 
 
 class Build(models.Model):
@@ -8,7 +9,7 @@ class Build(models.Model):
     cause = models.CharField(max_length=255)
     result = models.BooleanField(default=False)
     duration = models.IntegerField()
-    param = models.CharField(max_length=400)
+    param = JSONField()
     url = models.URLField(max_length=300)
     sub_builds = models.ManyToManyField('Build')
     is_sub = models.BooleanField(default=False)
