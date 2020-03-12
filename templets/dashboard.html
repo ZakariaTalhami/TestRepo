@@ -1,14 +1,74 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-<br><br>
-<div>
+{% extends 'base.html' %}
+{% load static %}
 
-</div>
+{% block script %}
+    <script src="{% static 'js/dashboard.js' %}"></script>
+{% endblock %}
 
-</body>
-</html>
+{% block content %}
+
+    <!-- Highcart container -->
+    <div class="row highchart">
+
+        <div id="chartLoader" class="ui large active centered inline loader"></div>
+        <figure class="highcharts-figure">
+            <div id="container"></div>
+            <p class="highcharts-description">
+                Chart showing rates of run-test job
+            </p>
+        </figure>
+    </div><!-- Highcart container -->
+
+    <!-- Builds Table -->
+    <div id="tableContainer" class="row dashboard">
+
+        <!-- table error msg -->
+        <div id="msgBlock" class="ui negative message" style="display: none">
+            <div class="header">
+                We're sorry, something went wrong. try again
+            </div>
+        </div>
+
+        <table class="ui celled padded table">
+            <thead>
+            <tr>
+                <th class="center aligned">#Build</th>
+                <th class="center aligned">Result</th>
+                <th class="center aligned">Date</th>
+                <th class="center aligned">Description</th>
+                <th class="center aligned">Range</th>
+                <th class="center aligned">Threshold</th>
+                <th class="center aligned">Cause</th>
+                <th class="center aligned">Duration</th>
+            </tr>
+            </thead>
+            <tbody>
+
+            <tr id="tableLoader">
+                <th colspan="8">
+                    <div class="ui active centered inline loader"></div>
+
+                </th>
+            </tr>
+
+            </tbody>
+            <tfoot>
+            <tr>
+                <th colspan="8">
+                    <div class="ui right floated pagination menu">
+                        <button id="btnPrev" class="ui button icon item" data-url="">
+                            <i class="left chevron icon"></i>
+                            &nbsp; Prev
+                        </button>
+                        <button id="btnNext" class="ui button icon item" data-url="">
+                            Next &nbsp;
+                            <i class="right chevron icon"></i>
+                        </button>
+                    </div>
+                </th>
+            </tr>
+            </tfoot>
+        </table>
+    </div><!-- Builds Table -->
+
+{% endblock %}

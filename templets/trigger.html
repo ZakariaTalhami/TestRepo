@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block script %}
+    <script src="{% static 'js/trigger.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+
+    <div class="ui sixteen wide column centered">
+
+        <!-- table error msg -->
+        <div id="msgBlock" class="ui negative message" style="display: none">
+            <div class="header">
+                We're sorry, something went wrong. try again
+            </div>
+        </div>
+
+        <form id="formTrigger" class="ui form">
+            <div class="fields">
+                <div class="seven wide field">
+                    <label>Min value</label>
+                    <input type="number" name="min">
+                </div>
+            </div>
+            <div class="fields">
+                <div class="seven wide field">
+                    <label>Max value</label>
+                    <input type="number" name="max">
+                </div>
+            </div>
+            <div class="fields">
+                <div class="seven wide field">
+                    <label>Threshold</label>
+                    <input type="number" name="th">
+                </div>
+            </div>
+            <div class="fields">
+                <button id="btnTrigger" type="button" class="ui button">Trigger</button>
+            </div>
+        </form>
+
+    </div>
+
+{% endblock %}

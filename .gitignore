@@ -4,3 +4,6 @@
 
 # MISC
 .DS_Store
+
+# cash
+__pycache__/

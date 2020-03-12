@@ -1,0 +1,56 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Dashboard{% endblock %}</title>
+
+    <!-- semantic style -->
+    <link rel="stylesheet" type="text/css"
+          href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
+    <script
+            src="https://code.jquery.com/jquery-3.1.1.min.js"
+            integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+            crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js"></script>
+
+    <!-- Highchart libraries  -->
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/modules/data.js"></script>
+    <script src="https://code.highcharts.com/modules/drilldown.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/modules/export-data.js"></script>
+    <script src="https://code.highcharts.com/modules/accessibility.js"></script>
+
+    <!-- custom style -->
+    <link rel="stylesheet" type="text/css" href="{% static 'style/style.css' %}">
+
+    {% block style %}{% endblock %}
+
+    {% block script %}{% endblock %}
+
+</head>
+<body>
+
+<div class="ui fluid container">
+    <div class="ui grid view-height view-width" style="margin-left: 0px;">
+        <!-- sidebar -->
+        <div class="four wide column sidebar">
+            <div class="c-menu">
+                <a class="c-item active" href="{% url "build:dashboard" %}">Dashboard</a>
+                <a class="c-item" href="{% url "build:trigger" %}">Trigger</a>
+            </div>
+        </div>
+
+        <!-- content -->
+        <div class="twelve wide column content">
+            <div class="row">
+                <h3 id="titleHeader">Dashboard</h3>
+            </div>
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

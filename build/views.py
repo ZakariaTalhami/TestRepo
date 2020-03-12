@@ -4,10 +4,11 @@ from .serializers import BuildSerializer
 from .models import Build
 from .appconfig import Config
 from datetime import date
-from django.db.models import Max
+from django.db.models import Max, Avg
 from django.views import View
-from django.http import HttpResponse, HttpResponseForbidden
+from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
 from rest_framework.pagination import PageNumberPagination
+import json
 import requests
 
 """
@@ -27,11 +28,19 @@ def analyze_action(actions, build_obj):
     for node in actions:
         if not node:
             continue
-        if node['_class'] == 'hudson.model.ParametersAction' or node['_class'] == 'com.tikal.jenkins.plugins.multijob.MultiJobParametersAction':
-            build_obj.param = {x['name']: x['value'] for x in node.get('parameters')}
+        print(node['_class'])
+        if node['_class'] == 'hudson.model.ParametersAction' or node[
+            '_class'] == 'com.tikal.jenkins.plugins.multijob.MultiJobParametersAction':
+            build_obj.param = {x['name']: x['value'] for x in node['parameters']}
+            # print("param "+ node['_class'])
+            # print(build_obj.param)
+            # print()
             count += 1
-        elif node['_class'] == 'hudson.triggers.TimerTrigger$TimerTriggerCause' or node['_class'] == 'hudson.model.Cause$UpstreamCause':
-            build_obj.cause = node.get('shortDescription')
+        elif node['_class'] == 'hudson.model.CauseAction':
+            # build_obj.cause = node['shortDescription']
+            # print("cauees " + node['_class'])
+            # print(build_obj.cause)
+            print(node)
             count += 1
         if count == 2:
             break
@@ -86,7 +95,7 @@ class BuildsListAPIView(generics.ListAPIView):
 
     def get_queryset(self):
         save_builds()
-        return Build.objects.filter(is_sub__exact=False)
+        return Build.objects.filter(is_sub__exact=False).order_by('num').reverse()
 
 
 class Dashboard(View):
@@ -98,7 +107,7 @@ class Dashboard(View):
 class Trigger(View):
     @staticmethod
     def get(request):
-        return render(request, 'dashboard.html', {})
+        return render(request, 'trigger.html', {})
 
     @staticmethod
     def post(request):
@@ -109,3 +118,8 @@ class Trigger(View):
             return HttpResponse(status=201)
         return HttpResponseForbidden()
 
+
+def buildsRate(requests):
+    response_data = {'rates': list(Build.objects.filter(is_sub__exact=False)
+                                   .extra(select={'name': 'date'}).values('name').annotate(y=Avg('result')))}
+    return JsonResponse(response_data)
