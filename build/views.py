@@ -57,7 +57,7 @@ def read_build(b):
 
     if b.get('subBuilds'):
         for sub in b.get('subBuilds'):
-            data = run_test_job_build('http://35.157.133.88:8080/' + sub['url'] + '/api/json')
+            data = run_test_job_build(Config.jenkins_base_url + sub['url'] + '/api/json')
             if data:
                 sub_build = read_build(data)
                 sub_build.is_sub = True
