@@ -1,7 +1,12 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block static_script %}
+    url_trigger = '{% url 'build:trigger' %}';
+{% endblock %}
+
 {% block script %}
+    {{ block.super }}
     <script src="{% static 'js/trigger.js' %}"></script>
 {% endblock %}
 

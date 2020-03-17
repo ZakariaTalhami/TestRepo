@@ -25,9 +25,13 @@
     <!-- custom style -->
     <link rel="stylesheet" type="text/css" href="{% static 'style/style.css' %}">
 
-    {% block style %}{% endblock %}
+    <script>
+        {% block static_script %}{% endblock %}
+    </script>
 
-    {% block script %}{% endblock %}
+    {% block script %}
+        <script src="{% static 'js/shared.js' %}"></script>
+    {% endblock %}
 
 </head>
 <body>
@@ -35,17 +39,20 @@
 <div class="ui fluid container">
     <div class="ui grid view-height view-width" style="margin-left: 0px;">
         <!-- sidebar -->
-        <div class="four wide column sidebar">
-            <div class="c-menu">
-                <a class="c-item active" href="{% url "build:dashboard" %}">Dashboard</a>
-                <a class="c-item" href="{% url "build:trigger" %}">Trigger</a>
+        <div class="three wide column sidebar">
+            <div class="menu-wrapper">
+                <div class="c-menu">
+                    <a class="c-item active" href="{% url "build:dashboard" %}">Dashboard</a>
+                    <a class="c-item" href="{% url "build:trigger" %}">Trigger</a>
+                </div>
             </div>
         </div>
 
         <!-- content -->
-        <div class="twelve wide column content">
-            <div class="row">
-                <h3 id="titleHeader">Dashboard</h3>
+        <div class="thirteen wide column content" id="content">
+            <div id="titleHeader" class="row">
+                <button id="btnToggle"><i class="bars icon"></i></button>
+                <h3>Dashboard</h3>
             </div>
             {% block content %}{% endblock %}
         </div>

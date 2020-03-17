@@ -1,7 +1,13 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block static_script %}
+    url_builds = '{% url 'build:all' %}';
+    url_rate = '{% url 'build:rate' %}';
+{% endblock %}
+
 {% block script %}
+    {{ block.super }}
     <script src="{% static 'js/dashboard.js' %}"></script>
 {% endblock %}
 
@@ -13,9 +19,6 @@
         <div id="chartLoader" class="ui large active centered inline loader"></div>
         <figure class="highcharts-figure">
             <div id="container"></div>
-            <p class="highcharts-description">
-                Chart showing rates of run-test job
-            </p>
         </figure>
     </div><!-- Highcart container -->
 
@@ -29,7 +32,7 @@
             </div>
         </div>
 
-        <table class="ui celled padded table">
+        <table class="ui celled padded table unstackable">
             <thead>
             <tr>
                 <th class="center aligned">#Build</th>
@@ -58,10 +61,9 @@
                     <div class="ui right floated pagination menu">
                         <button id="btnPrev" class="ui button icon item" data-url="">
                             <i class="left chevron icon"></i>
-                            &nbsp; Prev
                         </button>
+
                         <button id="btnNext" class="ui button icon item" data-url="">
-                            Next &nbsp;
                             <i class="right chevron icon"></i>
                         </button>
                     </div>

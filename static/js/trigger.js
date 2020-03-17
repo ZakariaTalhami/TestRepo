@@ -1,9 +1,9 @@
-//  build/trigger/
+
 function trigger() {
     $("#btnTrigger").on('click', function () {
         $.ajax({
             method: "post",
-            url: '/build/trigger/',
+            url: url_trigger,  // url_trigger var defined in trigger.html
             data : $('#formTrigger').serialize(),
             beforeSend: function (xhr) {
                 $("#btnTrigger").prop("disabled", true)
@@ -17,12 +17,12 @@ function trigger() {
             },
             success: function (data) {
                 $("#formTrigger input").val("")
-                console.log("succc")
             }
         });
     });
 }
 
 $(document).ready(function () {
+    $("#titleHeader h3").text("Trigger")
     trigger()
 });
